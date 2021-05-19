@@ -197,15 +197,15 @@ ServerClientDecode::ServerClientDecode(
     /* Start background worker thread */
     string endpoint = "inproc://bg-recv-worker";
     shared_ptr<WorkPuller> work_puller =
-        make_shared<WorkPuller>(zmq_ctx, endpoint);
+        boost::make_shared<WorkPuller>(zmq_ctx, endpoint);
     BackgroundWorker::WorkerCallback worker_callback =
         bind(&ServerClientDecode::decode_msg, this, _1);
     BackgroundWorker bg_worker(work_puller);
     bg_worker.add_callback(DECODE_CMD, worker_callback);
-    bg_decode_worker_thread = make_shared<boost::thread>(bg_worker);
+    bg_decode_worker_thread = boost::make_shared<boost::thread>(bg_worker);
 
     /* Init work pusher */
-    decode_work_pusher = make_shared<WorkPusher>(zmq_ctx, endpoint);
+    decode_work_pusher = boost::make_shared<WorkPusher>(zmq_ctx, endpoint);
   }
 }
 

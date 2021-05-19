@@ -271,7 +271,7 @@ void RouterHandler::do_handler(RecvCallback recv_callback) {
 }
 
 void RouterHandler::start_handler_thread(RecvCallback recv_callback) {
-  handler_thread = make_shared <thread>(
+  handler_thread = boost::make_shared <thread>(
       bind(&RouterHandler::do_handler, this, recv_callback));
   sleep(1);
       /* ZMQ 2.2 does not support connect before bind, so we have to wait

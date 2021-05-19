@@ -79,8 +79,8 @@ void ClientLib::init_comm_channel(
         uint channel_id,
         const GeePsConfig& config) {
   CommunicationChannel& comm_channel = comm_channels[channel_id];
-  comm_channel.mutex = make_shared<boost::mutex>();
-  comm_channel.cvar = make_shared<boost::condition_variable>();
+  comm_channel.mutex = boost::make_shared<boost::mutex>();
+  comm_channel.cvar = boost::make_shared<boost::condition_variable>();
 
   /* Init cuda stream and cublas handle */
   cudaStream_t& cuda_stream_recv = comm_channel.cuda_stream_recv;
@@ -97,12 +97,12 @@ void ClientLib::init_comm_channel(
   CUBLAS_CHECK(cublasSetStream(cublas_handle_send, cuda_stream_send));
 
   /* Init communication */
-  comm_channel.zmq_ctx = make_shared<zmq::context_t>(1);
+  comm_channel.zmq_ctx = boost::make_shared<zmq::context_t>(1);
 
   ServerThreadEntry server_entry(
       channel_id, num_channels, process_id, num_servers,
       comm_channel.zmq_ctx, config);
-  comm_channel.server_thread = make_shared<boost::thread>(server_entry);
+  comm_channel.server_thread = boost::make_shared<boost::thread>(server_entry);
 
   string client_name = (format("client-%i") % process_id).str();
   vector<string> bind_list;   /* Empty bind_list vector */
@@ -114,14 +114,14 @@ void ClientLib::init_comm_channel(
         "tcp://" + host_list[i] + ":" + boost::lexical_cast<std::string>(port);
     connect_list.push_back(connect_endpoint);
   }
-  comm_channel.router = make_shared<RouterHandler>(
+  comm_channel.router = boost::make_shared<RouterHandler>(
       channel_id, comm_channel.zmq_ctx, connect_list, bind_list,
       client_name, config);
-  comm_channel.encoder = make_shared<ClientServerEncode>(
+  comm_channel.encoder = boost::make_shared<ClientServerEncode>(
       comm_channel.router, host_list.size(), process_id, config);
 
   bool work_in_background = true;
-  comm_channel.decoder = make_shared<ServerClientDecode>(
+  comm_channel.decoder = boost::make_shared<ServerClientDecode>(
       channel_id, comm_channel.zmq_ctx,
       this, work_in_background, config);
   comm_channel.router->start_handler_thread(
@@ -130,15 +130,15 @@ void ClientLib::init_comm_channel(
   /* Start background worker thread */
   string endpoint = "inproc://bg-worker";
   shared_ptr<WorkPuller> work_puller =
-      make_shared<WorkPuller>(comm_channel.zmq_ctx, endpoint);
+      boost::make_shared<WorkPuller>(comm_channel.zmq_ctx, endpoint);
   BackgroundWorker::WorkerCallback iterate_callback =
       bind(&ClientLib::cbk_iterate, this, channel_id, _1);
   BackgroundWorker bg_worker(work_puller);
   bg_worker.add_callback(ITERATE_CMD, iterate_callback);
-  comm_channel.bg_worker_thread = make_shared<boost::thread>(bg_worker);
+  comm_channel.bg_worker_thread = boost::make_shared<boost::thread>(bg_worker);
 
   /* Init work pusher */
-  comm_channel.work_pusher = make_shared<WorkPusher>(
+  comm_channel.work_pusher = boost::make_shared<WorkPusher>(
                 comm_channel.zmq_ctx, endpoint);
 
   /* Init tables */

@@ -68,18 +68,18 @@ void ServerThreadEntry::server_entry(
   vector<string> bind_list;
   bind_list.push_back(request_url);
   string tablet_name = (format("tablet-%i") % process_id).str();
-  shared_ptr<RouterHandler> router_handler = make_shared<RouterHandler>(
+  shared_ptr<RouterHandler> router_handler = boost::make_shared<RouterHandler>(
       channel_id, zmq_ctx, connect_list, bind_list, tablet_name,
       config);
 
-  shared_ptr<ServerClientEncode> encoder = make_shared<ServerClientEncode>(
+  shared_ptr<ServerClientEncode> encoder = boost::make_shared<ServerClientEncode>(
       router_handler, cuda_stream, cublas_handle,
       num_processes, process_id, config);
 
-  shared_ptr<TabletStorage> storage = make_shared<TabletStorage>(
+  shared_ptr<TabletStorage> storage = boost::make_shared<TabletStorage>(
       channel_id, num_channels, process_id, num_processes,
       encoder, cuda_stream, cublas_handle, config);
-  shared_ptr<MetadataServer> metadata_server = make_shared<MetadataServer>(
+  shared_ptr<MetadataServer> metadata_server = boost::make_shared<MetadataServer>(
       channel_id, num_channels, process_id, num_processes,
       encoder, config);
   ClientServerDecode decoder(storage, metadata_server);

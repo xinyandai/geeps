@@ -67,14 +67,14 @@ void ClientLib::start_opseq() {
   alloc_worker_info.opseq_ptr = &opseq;
   alloc_worker_info.thread_cache_ptr = &thread_data_ref.thread_cache;
   alloc_worker_info.cpu_buffer_size = thread_data_ref.cpu_buffer_size;
-  thread_data_ref.alloc_worker_thread = make_shared<boost::thread>(bind(
+  thread_data_ref.alloc_worker_thread = boost::make_shared<boost::thread>(bind(
       &ClientLib::alloc_worker_entry, this, alloc_worker_info));
   /* Start reclaim worker */
   OpSeqWorkerInfo& reclaim_worker_info = thread_data_ref.reclaim_worker_info;
   reclaim_worker_info.opseq_ptr = &opseq;
   reclaim_worker_info.thread_cache_ptr = &thread_data_ref.thread_cache;
   reclaim_worker_info.cpu_buffer_size = thread_data_ref.cpu_buffer_size;
-  thread_data_ref.alloc_worker_thread = make_shared<boost::thread>(bind(
+  thread_data_ref.alloc_worker_thread = boost::make_shared<boost::thread>(bind(
       &ClientLib::reclaim_worker_entry, this, reclaim_worker_info));
   thread_data_ref.bg_worker_started = true;
   thread_data_ref.last_handle = -1;
